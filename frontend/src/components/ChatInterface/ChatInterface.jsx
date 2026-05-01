@@ -24,8 +24,8 @@ const ChatInterface = () => {
     setIsLoading(true);
 
     try {
-      // Backend linkini .env faylından götürür, əgər yoxdursa localhost istifadə edir
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      // Backend linkini .env faylından götürür
+      const API_URL = import.meta.env.VITE_API_URL;
       const response = await axios.post(`${API_URL}/api/generate`, { youtubeUrl: url });
       
       // Add ai response
