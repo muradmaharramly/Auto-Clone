@@ -24,8 +24,9 @@ const ChatInterface = () => {
     setIsLoading(true);
 
     try {
-      // Change port if backend runs on different port
-      const response = await axios.post('http://localhost:5000/api/generate', { youtubeUrl: url });
+      // Backend linkini .env faylından götürür, əgər yoxdursa localhost istifadə edir
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const response = await axios.post(`${API_URL}/api/generate`, { youtubeUrl: url });
       
       // Add ai response
       setMessages((prev) => [...prev, { type: 'ai', content: response.data }]);
