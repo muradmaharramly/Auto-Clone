@@ -6,12 +6,13 @@ const MAKE_WEBHOOK_URL = process.env.MAKE_WEBHOOK_URL || "SENİN_WEBHOOK_URL_BUR
 
 export const generateFromMake = async (youtubeUrl) => {
   try {
-    // 1. YouTube ID-sini ayırırıq
-    const videoId = youtubeUrl.split('v=')[1]?.split('&')[0] || youtubeUrl.split('/').pop();
+    // 1. YouTube ID-sini ayırırıq (daha güclü regex ilə)
+    const match = youtubeUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+    const videoId = match ? match[1] : null;
 
     if (!videoId) throw new Error("Düzgün YouTube linki daxil edilməyib.");
 
-    console.log("RapidAPI vasitəsilə transcript çəkilir...");
+    console.log(`RapidAPI vasitəsilə ${videoId} ID-li video üçün transcript çəkilir...`);
     
     // 2. RapidAPI ilə mətni çəkirik
     const rapidApiOptions = {
@@ -26,8 +27,12 @@ export const generateFromMake = async (youtubeUrl) => {
 
     const transcriptResponse = await axios.request(rapidApiOptions);
     
-    if (!transcriptResponse.data.success || !transcriptResponse.data.transcript) {
-        throw new Error("Bu videonun alt yazısı tapılmadı və ya RapidAPI xəta verdi.");
+    if (transcriptResponse.data.success === false) {
+        throw new Error(transcriptResponse.data.error || transcriptResponse.data.message || "Bu videonun alt yazısı yoxdur.");
+    }
+
+    if (!transcriptResponse.data.transcript) {
+        throw new Error("RapidAPI cavab qaytarmadı.");
     }
 
     // 3. Gələn massiv şəklindəki məlumatları təmiz mətnə çeviririk
